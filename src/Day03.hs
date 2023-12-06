@@ -1,3 +1,5 @@
+module Day03 (part1, part2) where
+
 import Data.Char
 
 type Coord = (Int, Int)
@@ -43,8 +45,8 @@ findStarCoords table = map fst . filter ((=='*') . snd) . concat $ coordsTable
 getPartNumbers :: [[Char]] -> [Int] 
 getPartNumbers arr = (map (read . snd) . filter (isAdjacentToSymbol arr) . getAllNumbers) arr
 
-main = do
-    input <- readFile "input.txt"
+part2 = do
+    input <- readFile "inputs/day03.txt"
     let table = lines input
     let numbers = filter (adjacentCheck table (=='*')) $ getAllNumbers table
     let starCoords = findStarCoords table
@@ -53,4 +55,4 @@ main = do
           isNumberAdjacent (xP,yP) ((xN,yN), num) = yN >= yP-1 && yN <= yP+1 
                                                  && xP >= xN-1 && xP <= xN + length num 
 
---main = sum . getPartNumbers . lines <$> readFile "input.txt"
+part1 = sum . getPartNumbers . lines <$> readFile "inputs/day03.txt"

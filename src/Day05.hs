@@ -1,3 +1,5 @@
+module Day05 (part1) where
+
 import Data.List
 import Data.List.Split
 
@@ -25,11 +27,10 @@ parseMap :: [String] -> AlmanacMap
 parseMap (desc:ranges) = AlmanacMap desc (map parseRange ranges)
 
 findInMaxDepth :: [AlmanacMap] -> Integer -> Integer
-findInMaxDepth [m] n = getDstFromMap m n
-findInMaxDepth (m:ms) n = findInMaxDepth ms (getDstFromMap m n)
+findInMaxDepth ms n = foldl (flip getDstFromMap) n ms
 
-main = do
-    content <- splitOn [""] . lines <$> readFile "input.txt"
+part1 = do
+    content <- splitOn [""] . lines <$> readFile "inputs/day05.txt"
     let seeds = map read $ words $ last $ splitOn ": " $ (head . head) content
     let maps = map parseMap $ tail content
-    return (foldr1 min $ map (findInMaxDepth maps) seeds)
+    return (foldl1 min $ map (findInMaxDepth maps) seeds)

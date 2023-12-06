@@ -1,3 +1,5 @@
+module Day02 (part1, part2) where
+
 import Data.List.Split
 import Data.Function (on)
 
@@ -35,7 +37,8 @@ updateMaxCubeSet maxSet curr = CubeSet { red=(max `on` red) maxSet curr
 gameMaxCubeSet :: [CubeSet] -> CubeSet
 gameMaxCubeSet = foldl1 updateMaxCubeSet
 
---maxCubeSet :: CubeSet
---maxCubeSet = CubeSet {red=12, green=13, blue=14}
---main = (sum . map fst . filter (isGamePossible maxCubeSet . snd) . zip [1..] . parse) <$> readFile "input.txt"
-main = sum . map ((\x -> red x * green x * blue x) . gameMaxCubeSet) . parse <$> readFile "input.txt"
+maxCubeSet :: CubeSet
+maxCubeSet = CubeSet {red=12, green=13, blue=14}
+
+part1 = (sum . map fst . filter (isGamePossible maxCubeSet . snd) . zip [1..] . parse) <$> readFile "inputs/day02.txt"
+part2 = sum . map (product . (\x -> ($ x) `map` [red, green, blue]) . gameMaxCubeSet) . parse <$> readFile "inputs/day02.txt"

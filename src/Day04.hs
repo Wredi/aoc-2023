@@ -1,3 +1,5 @@
+module Day04 (part1, part2) where
+
 import Data.List.Split
 import Data.List
 import Data.Bifunctor
@@ -27,7 +29,7 @@ getPoints :: [Int] -> Int
 getPoints arr = if len == 0 then 0 else 2 ^ (len-1)
     where len = length arr
 
---main = sum . map getPoints . map getWinningNumbers . parseCards . lines <$> readFile "input.txt"
-main = do
-    cards <- parseCards . lines <$> readFile "input.txt"
+part1= sum . map getPoints . map getWinningNumbers . parseCards . lines <$> readFile "inputs/day04.txt"
+part2 = do
+    cards <- parseCards . lines <$> readFile "inputs/day04.txt"
     return (length cards + (sum $ map (getCardsCount cards) $ take (length cards) [0..]))

@@ -1,3 +1,5 @@
+module Day01 (part2) where
+
 import Data.Char
 import Data.List
 import Data.Bifunctor
@@ -29,4 +31,4 @@ parseLine line = read <$> sequence [leftNum, rightNum]
     where leftNum = firstDigit initDigitMap line 
           rightNum = firstDigit (map (first reverse) initDigitMap) (reverse line)
 
-main = readFile "input" >>= (print . fmap sum . sequence . map parseLine . lines) 
+part2 = readFile "inputs/day01.txt" >>= (print . fmap sum . sequence . map parseLine . lines) 
