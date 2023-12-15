@@ -1,12 +1,14 @@
-module Day07 (part1) where
+module Day07 (part2) where
 
 import Data.List.Split 
-import Data.List
+import qualified Data.List as L
 import Data.Function
+import Data.Maybe
 import Data.Bifunctor
+import qualified Data.Map as Map
 
-data Card = Two | Three | Four | Five | Six | Seven | Eight 
-            | Nine | Ten | Jack | Queen | King | Ace deriving (Eq,Ord,Show)
+data Card = Joker | Two | Three | Four | Five | Six | Seven | Eight 
+            | Nine | Ten | Queen | King | Ace deriving (Eq,Ord,Show)
 
 data HandType = HighCard | OnePair | TwoPair
                 | ThreeOfAKind | FullHouse | FourOfAKind 
@@ -23,6 +25,7 @@ instance Ord Hand where
 
 parseCard :: Char -> Card
 parseCard c = case c of
+                'J' -> Joker
                 '2' -> Two
                 '3' -> Three
                 '4' -> Four
@@ -32,7 +35,6 @@ parseCard c = case c of
                 '8' -> Eight
                 '9' -> Nine
                 'T' -> Ten
-                'J' -> Jack
                 'Q' -> Queen
                 'K' -> King
                 'A' -> Ace
@@ -41,18 +43,31 @@ parseCard c = case c of
 parseCards :: String -> [Card]
 parseCards = map parseCard
 
+countOccurrences :: (Ord a) => [a] -> Map.Map a Int
+countOccurrences = foldl (\acc x -> Map.insertWith (+) x 1 acc) Map.empty
+
+changeFirstMatch :: (Eq a) => (a -> a) -> (a -> Bool) -> [a] -> [a]
+changeFirstMatch _ _ [] = []
+changeFirstMatch trans check (c:cs) 
+    | check c = trans c:cs 
+    | otherwise = c : changeFirstMatch trans check cs
+
 handType :: [Card] -> HandType
 handType cards
-	| 5 `isCountEq` 5 = FiveOfAKind
-	| 4 `isCountEq` 4 && 1 `isCountEq` 1 = FourOfAKind
-	| 3 `isCountEq` 3 && 2 `isCountEq` 2 = FullHouse
-	| 3 `isCountEq` 3  && 1 `isCountEq` 2 = ThreeOfAKind
-	| 2 `isCountEq` 4 && 1 `isCountEq` 1 = TwoPair
-	| 2 `isCountEq` 2 && 1 `isCountEq` 3 = OnePair
-	| 1 `isCountEq` 5 = HighCard
-    where countList = map cardCount cards
-          cardCount c = (length . filter (==True) . map (==c)) cards
-          isCountEq num reqNum = (length . filter (==num)) countList == reqNum
+	| countList == [5] = FiveOfAKind
+	| countList == [1,4] = FourOfAKind
+	| countList == [2,3] = FullHouse
+	| countList == [1,1,3] = ThreeOfAKind
+	| countList == [1,2,2] = TwoPair
+	| countList == [1,1,1,2] = OnePair
+	| countList == [1,1,1,1,1] = HighCard
+    | otherwise = error (show cards)
+    where occurrencesMap = countOccurrences cards 
+          occurrences = map snd . filter ((/=Joker) . fst) . Map.toList $ occurrencesMap
+          jokerLength = fromMaybe 0 . Map.lookup Joker $ occurrencesMap  
+          maxCountNum = maximum occurrences
+          countList = if occurrences == [] then [jokerLength]
+                      else L.sort . changeFirstMatch (+jokerLength) (==maxCountNum) $ occurrences
 
 parseHand :: String -> Hand
 parseHand cardChars = Hand (handType cards) cards
@@ -65,4 +80,4 @@ parseHandWithBid input = bimap parseHand read (cardChars, bid)
 parseHandsWithBid :: (Integral a, Read a) => [String] -> [(Hand,a)]
 parseHandsWithBid = map parseHandWithBid
 
-part1 = (sum . map (uncurry (*)) . zip [1..] . map snd . sortBy (compare `on` fst) . parseHandsWithBid . lines) <$> readFile "inputs/day07.txt"
+part2 = (sum . map (uncurry (*)) . zip [1..] . map snd . L.sortBy (compare `on` fst) . parseHandsWithBid . lines) <$> readFile "inputs/day07.txt"
